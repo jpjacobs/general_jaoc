@@ -8,5 +8,5 @@ jaoc.ijs
 example.ijs
 README.md
 )
-RELEASE =: j903
+RELEASE =: 'j903'
 FOLDER =: 'general/jaoc'
