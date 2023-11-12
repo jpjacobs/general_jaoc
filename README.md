@@ -3,8 +3,7 @@
 ## Installation
 In a recent distribution of J, do:
 
-    load'pacman'
-    install 'git:jpjacobs/general_jaoc'
+    install 'github:jpjacobs/general_jaoc'
 
 This installs JAOC in the ~addons/general/ folder.
 
