@@ -38,7 +38,7 @@ URL  =: 'https://adventofcode.com'
 
 setup =: $:&'./' : {{ NB. monad: y=year; Dyad, x: year, y directory where to CD to.
   1!:44 jpath y
-  if. _1=nc <'COOKIE' do. 'COOKIE.txt missing' assert #COOKIE=:LF -.~ freads 'COOKIE.txt' end. 
+  if. _1=nc <'COOKIE' do. 'COOKIE.txt missing' assert 128=#COOKIE=:LF -.~ freads 'COOKIE.txt' end. 
   if. IFJA do. HTTPCMD_wgethttp_ =. 'curl' end. NB. Seems to work, but is empty on Android.
   YEAR =: x 
 }}
