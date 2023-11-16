@@ -23,7 +23,7 @@ definitions of previous days can be reused without having to wait for
 execution results.
 
 The aoc locale has:
-  setup year or year setup dir: If dyad, set path to directory having cached input & COOKIE.txt, then setup year, verify cookie, and 
+  [path] setup year: set path to "path" (default to J's working directory) having cached input & COOKIE.txt, then setup year, verify cookie, and
                    fix Android gethttp to use cURL (works on my phone...)
   [ans] req YYYY D P: monad: GET input for year YYYY, day D (P optional and ignored)
                     : dyad : POST ans as answer for YYYY,D, part P (1 or 2)
@@ -36,11 +36,11 @@ NB. config and setting up
 NB. ====================================================================
 URL  =: 'https://adventofcode.com'
 
-setup =: $:&'./' : {{ NB. monad: y=year; Dyad, x: year, y directory containing cached input & COOKIE.txt
-  PATH=: '/',~^:(~:{:) jpath y
+setup =: './'&$: : {{ NB. y=year, x=directory containing cached input & COOKIE.txt (defaults to './', i.e. current working directory)
+  PATH=: '/',~^:(~:{:) jpath x
   'COOKIE.txt missing' assert 128=#COOKIE=:LF -.~ freads PATH,'COOKIE.txt'
   if. IFJA do. HTTPCMD_wgethttp_ =. 'curl' end. NB. Seems to work, but is empty on Android.
-  YEAR =: x 
+  YEAR =: y
 }}
 
 NB. req : Low level verb for implementing "io" and "sub"; does interaction with the website, buffering inputs.

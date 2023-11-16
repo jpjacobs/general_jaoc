@@ -1,7 +1,7 @@
 NB. Example file for jAOC 
 load 'general/jaoc'
 NB. Set year (e.g. 2016)
-2016 setup_aoc_ './'
+'~temp' setup_aoc_ 2016
 
 1 day {{ NB. Test problem
   p2 =: 2*p1 =: len=:# NB. Nonsense example code
