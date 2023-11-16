@@ -23,8 +23,8 @@ definitions of previous days can be reused without having to wait for
 execution results.
 
 The aoc locale has:
-  setup year or year setup dir: If dyad, cd to dir, then setup year, verify cookie, and 
-                   fixe Android gethttp to use cURL (works on my phone...)
+  setup year or year setup dir: If dyad, set path to directory having cached input & COOKIE.txt, then setup year, verify cookie, and 
+                   fix Android gethttp to use cURL (works on my phone...)
   [ans] req YYYY D P: monad: GET input for year YYYY, day D (P optional and ignored)
                     : dyad : POST ans as answer for YYYY,D, part P (1 or 2)
                              returns some rough text extracted.
@@ -36,9 +36,9 @@ NB. config and setting up
 NB. ====================================================================
 URL  =: 'https://adventofcode.com'
 
-setup =: $:&'./' : {{ NB. monad: y=year; Dyad, x: year, y directory where to CD to.
-  1!:44 jpath y
-  if. _1=nc <'COOKIE' do. 'COOKIE.txt missing' assert 128=#COOKIE=:LF -.~ freads 'COOKIE.txt' end. 
+setup =: $:&'./' : {{ NB. monad: y=year; Dyad, x: year, y directory containing cached input & COOKIE.txt
+  PATH=: '/',~^:(~:{:) jpath y
+  'COOKIE.txt missing' assert 128=#COOKIE=:LF -.~ freads PATH,'COOKIE.txt'
   if. IFJA do. HTTPCMD_wgethttp_ =. 'curl' end. NB. Seems to work, but is empty on Android.
   YEAR =: x 
 }}
@@ -48,7 +48,7 @@ NB.     req YYYY DD P gets input for year YYYY and date DD if not downloaded yet
 NB. ANS req YYYY DD P POST's ANS as answer to day DD of year YYYY part P
 req =: {{
   y=. 2 {. y
-  if. -.fexist fn=.'.txt',~ ;('r<0>4.0',:'r<0>2.0')8!:0"1 0 y do.
+  if. -.fexist fn=.PATH,'.txt',~ ;('r<0>4.0',:'r<0>2.0')8!:0"1 0 y do.
     if. HTTPCMD_wgethttp_ = 'curl' do.
       opts =. '-s -H "cookie: session=_" ' rplc '_';COOKIE
     else.
