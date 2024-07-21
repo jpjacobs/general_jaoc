@@ -7,7 +7,7 @@ Don't add to your Git repo.
 Defines the following names in z:
   day: conjunction. m=day no; v is verb implementing p1, p2 (add 0 or y at
        end to return noun) see below for details.
-  run: run and time day numbers in y (x=0 or monad: only last; x=1: all+summary
+  run: run and time day numbers in y
   sub: submit last run result for day {. y, part {: y eg. "sub 25 1" or
        "sub 5 2"; shorthand for "1 io_d25_ 0{::RES_d25_"
 
@@ -86,18 +86,17 @@ day_z_ =: {{
   cocurrent'base'
 }}
 NB. run and time days in y (numeric list) x=1: show complete overview; x=0 or not provided: run solutions and show results only for last day in y
-run_z_ =: 0&$: : {{
-  x =. -.x
+run_z_ =: {{
   res=. 0 4$a:
   header=.,:'Day';'Part 1';'Part 2';'Time'
-  for_d. {:^:x y do.
+  for_d. y do.
     cocurrent 'd',":d        NB. set day locale
     inp =. io''              NB. get input to exclude it from execution time
     tic =.(6!:1)''           NB. starting time 
     dr  =. RES =: (p1;p2)inp NB. get result, store in day locale and local var dr
     res =. res,(<":d),dr,<(6!:1'')-tic NB. add result and timing to res
   end.
-  if. x do. }.{:res else. header,res,_4 {. 'Total';+/;{:"1 res end.
+  if. 2>#y do. }.{:res else. header,res,_4 {. 'Total';+/;{:"1 res end.
 }}
 NB. submit last run result for day {.y level {:y, numeric y
 sub_z_ =: {{

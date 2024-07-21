@@ -13,7 +13,7 @@ After loading the addon, the setup verb checks the session cookie which should b
 
 setup is called as:
 
-    setup_aoc_ 2023      NB. directory defaults to the current directory
+         setup_aoc_ 2023 NB. directory defaults to the current directory
     './' setup_aoc_ 2023 NB. change directory and then setup.
 
 JAoC offers tools for getting input to the website and submitting results to the website.
@@ -29,7 +29,7 @@ A typical script would have:
       0  NB. obligatory noun result
     }}
     NB. ... more days
-    echo 1 run >:i.10 NB. e.g. run&time first 10 days
+    echo run >:i.10 NB. e.g. run&time first 10 days
 
 Once the day is defined and run, the following verbs are provided in a locale corresponding to the day (e.g. d5 for day 5):
 
