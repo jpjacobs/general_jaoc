@@ -49,7 +49,7 @@ NB. ANS req YYYY DD P POST's ANS as answer to day DD of year YYYY part P
 req =: {{
   y=. 2 {. y
   if. -.fexist fn=.PATH,'.txt',~ ;('r<0>4.0',:'r<0>2.0')8!:0"1 0 y do.
-    if. HTTPCMD_wgethttp_ = 'curl' do.
+    if. 'curl' +/@:E. tolower HTTPCMD_wgethttp_ do.
       opts =. '-s -H "cookie: session=_" ' rplc '_';COOKIE
     else.
       'wget not supported yet' assert 0
@@ -60,7 +60,7 @@ req =: {{
   end.
   freads fn
 }} : {{
-  if. HTTPCMD_wgethttp_ = 'curl' do.
+  if. 'curl' +/@:E. tolower HTTPCMD_wgethttp_ do.
     opts =.'-d "level=L&answer=A" ' rplc 'L';(":{:y);'A';":x
     opts =. opts,'-s -H "cookie: session=_"' rplc '_';COOKIE
   else.
