@@ -9,7 +9,7 @@ This installs JAOC in the ~addons/general/ folder.
 
 ## Configuration
 
-After loading the addon, the setup verb checks the session cookie which should be provided in COOKIE.txt in the directory where AoC will execute. See [this page](https://github.com/wimglenn/advent-of-code-wim/issues/1) on how to get it.
+After loading the addon, the setup verb checks the session cookie which should be provided in COOKIE.txt in the directory where AoC will execute. See [this page](https://github.com/wimglenn/advent-of-code-wim/issues/1) on how to get it. Paste this key in a new file named COOKIE.txt in the directory where your year scripts are stored.
 
 setup is called as:
 

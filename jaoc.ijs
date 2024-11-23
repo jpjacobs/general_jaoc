@@ -2,8 +2,11 @@ NB. Helper functions for https://adventofcode.com for organising code, getting
 NB. input and uploading solutions.
 Note 'Documentation'
 Expects COOKIE.txt to contain the session cookie (see here:
-https://github.com/wimglenn/advent-of-code-wim/issues/1) how to get it.
-Don't add to your Git repo.
+https://github.com/wimglenn/advent-of-code-wim/issues/1) how to get it; copy
+paste it in a new file named COOKIE.txt in the same directory as the year
+scripts you're going to create or run.
+**Don't add to your Git repo.**
+
 Defines the following names in z:
   day: conjunction. m=day no; v is verb implementing p1, p2 (add 0 or y at
        end to return noun) see below for details.
@@ -23,7 +26,7 @@ definitions of previous days can be reused without having to wait for
 execution results.
 
 The aoc locale has:
-  [path] setup year: set path to "path" (default to J's working directory) having cached input & COOKIE.txt, then setup year, verify cookie, and
+  [path] setup year : set "path" as data directory (default to J's working directory) having cached input, then setup year, verify cookie, and
                    fix Android gethttp to use cURL (works on my phone...)
   [ans] req YYYY D P: monad: GET input for year YYYY, day D (P optional and ignored)
                     : dyad : POST ans as answer for YYYY,D, part P (1 or 2)
@@ -38,7 +41,7 @@ URL  =: 'https://adventofcode.com'
 
 setup =: './'&$: : {{ NB. y=year, x=directory containing cached input & COOKIE.txt (defaults to './', i.e. current working directory)
   PATH=: '/',~^:(~:{:) jpath x
-  'COOKIE.txt missing' assert 128=#COOKIE=:LF -.~ freads PATH,'COOKIE.txt'
+  'COOKIE.txt missing' assert 128=#COOKIE=:LF -.~ freads 'COOKIE.txt'
   if. IFJA do. HTTPCMD_wgethttp_ =. 'curl' end. NB. Seems to work, but is empty on Android.
   YEAR =: y
 }}
