@@ -1,5 +1,12 @@
 # J utilities for [Advent of Code](https://adventofcode.com)
 
+## Features
+- Easy script organisation of multiple days
+- Allows reuse of days for others using coinsert
+- Input caching
+- Answer and hint tracking and validation beforo submission (too high/low)
+- HTTP throttling for preventing accidental server spamming
+
 ## Installation
 In a recent distribution of J, do:
 
@@ -14,7 +21,7 @@ After loading the addon, the setup verb checks the session cookie which should b
 setup is called as:
 
          setup_aoc_ 2023 NB. directory defaults to the current directory
-    './' setup_aoc_ 2023 NB. change directory and then setup.
+    'data/' setup_aoc_ 2023 NB. use "data/" as directory for inputs and solution files; COOKIE.txt should still be in the working directory.
 
 JAoC offers tools for getting input to the website and submitting results to the website.
 It also has a setup for easily structuring the code, selectively running and timing days.
@@ -39,13 +46,30 @@ Once the day is defined and run, the following verbs are provided in a locale co
 Afterwards, the user provided verb (has to return a noun) is run to define all names required to implement p1 and p2
 Note, use global assignment, as p1 and p2 will be run from the day's locale, not from the verb provided to day. This allows reuse of previously solved days by just doing "coninsert d5" for, for instance, including anything defined in day 5 in the current day.
 
-sub_z_ can be used to quickly submit the last answer run has calculated for a day:
+sub\_z_ can be used to quickly submit the last answer run has calculated for a day:
 
     NB. After implementing the solution for day 10:
-    run 10     NB. outputs results & timing for both parts
     sub 10 2   NB. submit the output for part 2 to AoC.
 
+Sub stores attempts, and the hint gotten (too high, too low, not right) in a solution file in the data directory. Before each try it checks whether the correct solution hasn't been submitted before, and whether the new answer falls the range that is still plausible given previous tries.
+If not, it refuses to submit, avoiding time-outs.
+
+Note that HTTP requests are throttled to maximum 5/5 min (more than the limit of once/15 min requested for leaderboard polling, which this addon doesn't provide).
+
 For avoiding repetitive typing, I chose to provide day, run and sub in the z-locale.
+
+### Typical workflow
+
+A typical workflow would, after setup as above:
+
+- Make the entry of the current day using the 'day' conjunction;
+- Change the run line to run only the current day;
+- Load the script to define the day
+- Use ```cocurrent 'dX'``` to change to the day's locale.
+- Use io'' to take a look at the input, experiment in the REPL, and gradually build the solution verb p1 (taking the raw input as sole argument) for part 1.
+- Once confident, use ```sub X 1``` to submit the answer.
+
+Rince and repeat for part 2.
 
 
 ### Remarks
