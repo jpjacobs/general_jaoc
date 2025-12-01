@@ -12,7 +12,9 @@ Defines the following names in z:
        end to return noun) see below for details.
   run: run and time day numbers in y
   sub: submit last run result for day {. y, part {: y eg. "sub 25 1" or
-       "sub 5 2"; shorthand for "1 io_d25_ 0{::RES_d25_"
+       "sub 5 2"; shorthand for "1 io_d25_ 0{::RES_d25_".
+       It runs the day if RES is undefined and checks it's not 0;0, which
+       indicates p1 and p2 are missing.
 
 day runs its code in locale 'dm' with m being the day no. This locale has:
 io: monad: get input for the day (for exploration, "run" automatically gets
@@ -27,9 +29,14 @@ definitions of previous days can be reused without having to wait for
 execution results.
 
 The aoc locale has:
-  [path] setup year : set "path" as data directory (default to J's working directory) having cached input, then setup year, verify cookie, and
-                   fix Android gethttp to use cURL (works on my phone...)
-  [ans] req YYYY D P: monad: GET input for year YYYY, day D (P optional and ignored)
+  [path] setup year : set "path" as data directory (default to J's working
+                      directory) having cached input, then setup year, verify
+                      cookie in working directory and fix Android gethttp to
+                      use cURL (works on my phone...). path will be created if
+                      non-existent.
+
+Internal functions of the aoc locale of little use by itself:
+  [ans] req YYYY D P: monad: GET input for year YYYY, day D (P optional & ignored)
                     : dyad : POST ans as answer for YYYY,D, part P (1 or 2)
                              returns some rough text extracted.
 )
@@ -42,14 +49,19 @@ URL   =: 'https://adventofcode.com'
 AGENT =: 'github.com/jpjacobs/jAOC if complaints, please make a Github issue'
 THROT =: 5 5 NB. A,B: max A req per B minutes
 
-setup =: './'&$: : {{ NB. y=year, x=directory containing cached input & COOKIE.txt (defaults to './', i.e. current working directory)
+setup =: './'&$: : {{ NB. y=year, x=directory containing cached input & solutions tried (defaults to './', i.e. current working directory)
   PATH=: '/',~^:(~:{:) jpath x
+  if. -. 2=ft=.ftype PATH do.
+    ('data dir could not be created') assert fpathcreate PATH
+  end.
   'COOKIE.txt missing' assert 128=#COOKIE=:LF -.~ freads 'COOKIE.txt'
   if. IFJA do. HTTPCMD_wgethttp_ =. 'curl' end. NB. Seems to work, but is empty on Android.
   YEAR =: y
   NB. Throttle requests; list of connection timestamps
   NB. keep last N; refuse if now-first kept is < X min
-  REQS =: ({.THROT)$0
+  if. 3~:nc<'REQS_aoc_' do. NB. should persist past loads
+    REQS =: ({.THROT)$ 0
+  end.
 }}
 NB. Throttle requests based on THROT & REQS
 NB. returns empty if fine; else error.
@@ -59,8 +71,7 @@ throttle =: {{
   NB. keep max {.THROT el of Req timestamps, t
   0 0$REQS_aoc_ =: (}.REQS),t
 }}
-NB. TODO: Test, perhaps take article tag into account
-NB. cleanhtml =: #~ 0=[:+/\&.|. 1 _1 +/ .* '<>' =/ ]
+cleanhtml =: #~[:-.[:+/\[:+/0 _1(|."0 1)1 _1*'<>'=/]
 
 NB. req : Low level verb for implementing "io" and "sub"; does interaction with the website, buffering inputs.
 NB.     req YYYY DD P gets input for year YYYY and date DD if not downloaded yet. Saves input as YYYYDD.txt (ignores P if present.)
@@ -76,18 +87,21 @@ req =: {{
     end.
     inp =. opts gethttp URL,'/YY/day/DD/input' rplc ('YY';'DD') ,. <@":"0 y
     'COOKIE.txt wrong or expired' assert -. 'Puzzle inputs differ by user.  Please log in to get your puzzle input.' +./@:E. inp
+    ('Day ',(":y),' not open yet; check calendar') assert -. 'before it unlocks' +./@:E. inp
     inp fwrites fn  NB. file will contain appropriate LF ending.
   end.
   freads fn
 }} : {{
   if. _1 = s =. freads fn=.PATH,'sol','.txt',~ ;('r<0>',"1'4.0','2.0',:'2.0')8!:0"1 0 y do. 'i t'=. '' ,&< (0$a:) else. 'i t'=. ({.;._2 ,&< <@}.;._2) s end.
   NB. check previous tries
-  if. (#t)>pl=. t i. <":x do. NB. Already tried
+  if. (#i)>pl=. i i. 'V' do.  NB. correct answer known
+    echo 'trying to send ',(":x),' :',LF,'correct answer already submitted: ',(pl{::t)
+  elseif. (#t)>pl=. t i. <":x do. NB. Already tried solution
     echo 'solution already sent; was ' , '.',~(<;._1'_too low_too high_wrong_correct_unknown'){::~'LH-V'i.pl{i
   elseif. 'min max'=. (>./,0".&>t#~'L'=i);(<./,0".&>t#~'H'=i)
     (min&< *: <&max) x do. NB. Not tried yet; check range (if no range, fail graciously)
     echo (":x),' out of range ',(":min),' ',":max
-  else.
+  else. NB. actually try to submit a solution
     throttle_aoc_'' NB. Can we connect?
     if. 'curl' +/@:E. tolower HTTPCMD_wgethttp_ do.
       opts =.'-d "level=L&answer=A" ' rplc 'L';(":{:y);'A';":x
@@ -96,14 +110,11 @@ req =: {{
     else.
       'wget not supported yet' assert 0
     end.
-    BAR_base_=:res =. opts gethttp URL,'/YY/day/DD/answer' rplc ('YY';'DD') ,. <@":"0 }: y
-    NB. res =: '<article> That''s not the right answer, your answer is too ',('low' [^:(0.5>?0) 'high'),'. </article>'
-    NB. TODO: check other pre-cooked examples.
+    res =. opts gethttp URL,'/YY/day/DD/answer' rplc ('YY';'DD') ,. <@":"0 }: y
     'COOKIE.txt wrong or expired' assert -. 'please identify yourself' +./@:E. res
     'Already solved or still locked' assert -. 'right level' +./@:E. res
     NB. post process to get proper answer: find first article, drop enough, and then take to '.' for first sentence.
-    res =. '.' taketo (}.~ 8+'article'i.&1@:E.]) res
-    NB. TODO Parse answer better; print result; check 'too high' 'too low' 'correct' 'incorrect'; perhaps add . where required.
+    res =. cleanhtml '.' taketo (}.~ 8+'article'i.&1@:E.]) res
     NB. store new try with previous tries
     ni =. 'LH-V?' {~ 1 i.~ (<;._1 '_too low_too high_not the right_right') +./@:E.&> <res
     l  =. (0 {.@".&> t) I. x NB. get where X should be (0 ". fails graciously)
@@ -151,7 +162,13 @@ NB. submit last run result for day {.y level {:y, numeric y
 sub_z_ =: {{
   sl =. coname''
   cocurrent'd',":{.y
-  res=. ({:y) io (<:{:y){:: RES
+  if. _1=nc<'RES' do. NB. day didn't run yet
+    run {.y
+  end.
+  if. RES-: 0;0 do.
+    res=. echo 'implement p1 and/or p2 first' else.
+    res=. ({:y) io (<:{:y){:: RES
+  end.
   cocurrent 'sl'
   res
 }}
